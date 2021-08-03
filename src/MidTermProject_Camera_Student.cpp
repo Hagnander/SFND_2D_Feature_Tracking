@@ -39,6 +39,7 @@ int main(int argc, const char *argv[])
     int dataBufferSize = 2;       // no. of images which are held in memory (ring buffer) at the same time
     vector<DataFrame> dataBuffer; // list of data frames which are held in memory at the same time
     bool bVis = false;            // visualize results
+    double totTime = 0;           // Total Time to extract keypoint detection and descriptor extraction 
 
     /* MAIN LOOP OVER ALL IMAGES */
 
@@ -78,15 +79,17 @@ int main(int argc, const char *argv[])
 
         if (detectorType.compare("SHITOMASI") == 0)
         {
-            detKeypointsShiTomasi(keypoints, imgGray, false);
+            totTime = totTime + detKeypointsShiTomasi(keypoints, imgGray, false);
         }
         else if (detectorType.compare("HARRIS") == 0)
         {
-            detKeypointsHarris(keypoints, imgGray, false);
+            totTime = totTime + detKeypointsHarris(keypoints, imgGray, false);
         }
         else
         {
-            detKeypointsModern(keypoints, imgGray, detectorType, false);
+            cout << "totTime1 = " << totTime << endl;
+            totTime = totTime + detKeypointsModern(keypoints, imgGray, detectorType, false);
+            cout << "totTime2 = " << totTime << endl;
         }
         //// EOF STUDENT ASSIGNMENT
 
@@ -136,7 +139,9 @@ int main(int argc, const char *argv[])
 
         cv::Mat descriptors;
         string descriptorType = "SIFT"; // BRISK, BRIEF, ORB, FREAK, AKAZE, SIFT
-        descKeypoints((dataBuffer.end() - 1)->keypoints, (dataBuffer.end() - 1)->cameraImg, descriptors, descriptorType);
+        cout << "totTime3 = " << totTime << endl;
+        totTime = totTime + descKeypoints((dataBuffer.end() - 1)->keypoints, (dataBuffer.end() - 1)->cameraImg, descriptors, descriptorType);
+        cout << "totTime4 = " << totTime << endl;
         //// EOF STUDENT ASSIGNMENT
 
         // push descriptors for current frame to end of data buffer
@@ -191,6 +196,8 @@ int main(int argc, const char *argv[])
         }
 
     } // eof loop over all images
+
+    cout << "totTime in ms= " << totTime * 1000 << endl;
 
     return 0;
 }
